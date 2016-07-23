@@ -1,0 +1,23 @@
+{
+  "name": "cinemaDB",
+  "version": "0.0.0",
+  "description": "2016 Summer KAIST CS496 Final Project - DB server",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sangguk2/cinemaDB.git"
+  },
+  "author": "",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/sangguk2/cinemaDB/issues"
+  },
+  "dependencies": {
+    "body-parser": "~1.15.2",
+    "express": "~4.14.0",
+    "mongoose": "~4.5.5"
+  }
+}
