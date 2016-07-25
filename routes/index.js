@@ -1,7 +1,6 @@
-
-module.exports = function(app, Movie)
+module.exports = function(app, movie)
 {
-	app.post('/api/movies', function(req, res){
+	/*app.post('/api/movies', function(req, res){
 		var movie = new Movie();
 		movie.title = req.body.name;
 		movie.timetable = req.body.timetable;
@@ -15,8 +14,19 @@ module.exports = function(app, Movie)
 			}
 			res.json({result: 1});
 		});
-	});
+	});*/
 
+  app.get('/', function(req,res){
+    fs.readFile('./html/got.html', function(error,data){ //load index.html
+    if(error){
+      console.log(error);
+    }else{
+      res.writeHead(200, {'Content-Type': 'text/html'}); //set Head Type
+      res.end(data); //load html response
+    }
+    });
+  });
+/*
 	app.get('/api/movies', function(req,res){
 		Movie.find(function(err, movies){
 			if(err) return res.status(500).send({error: 'database failure'});
@@ -54,7 +64,5 @@ module.exports = function(app, Movie)
 			if(err) return res.status(500).json({error: 'database failure'});
 			res.status(204).end();
 		});
-	});
-	
- 
+	});*/
 }

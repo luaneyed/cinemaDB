@@ -1,4 +1,4 @@
-var mongoose = requie('mongoose');
+var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var movie = new Schema({
