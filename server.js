@@ -15,8 +15,7 @@ mongoose.connect('mongodb://localhost/cinema');
 app.use(bodyParser.urlencoded({ extended : true}));
 app.use(bodyParser.json());
 
-//var port = 8080;
-var port = process.env.PORT || 8080;
+var port = process.env.PORT || 9090;
 
 var router = require('./routes')(app, Play);
 
