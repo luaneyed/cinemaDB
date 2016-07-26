@@ -1,21 +1,15 @@
-module.exports = function(app, movie)
+module.exports = function(app, Play)
 {
-	/*app.post('/api/movies', function(req, res){
-		var movie = new Movie();
-		movie.title = req.body.name;
-		movie.timetable = req.body.timetable;
-		movie.review = req.body.review;
-		movie.score = req.body.score;
-		movie.save(function(err){
-			if(err){
-				console.error(err);
-				res.json({result: 0});
-				return;
-			}
-			res.json({result: 1});
-		});
-	});*/
+  app.get('/plays', function(req,res){
+    Play.find({}, {"_id": false, "__v": false}, function(err, plays){
+      if(err)
+        return res.status(500).send({error: 'database failure'});
+      res.json(plays);
+    });
+  });
 
+
+  /*
   app.get('/', function(req,res){
     fs.readFile('./html/got.html', function(error,data){ //load index.html
     if(error){
@@ -26,7 +20,8 @@ module.exports = function(app, movie)
     }
     });
   });
-/*
+  */
+  /*
 	app.get('/api/movies', function(req,res){
 		Movie.find(function(err, movies){
 			if(err) return res.status(500).send({error: 'database failure'});
