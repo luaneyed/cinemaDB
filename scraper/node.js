@@ -17,6 +17,7 @@ var casperData = "";
 
 casperPlay.stdout.on('data', function(data) {
   casperData += data;
+  process.stdout.write(data);
   if(data.slice(-1) == '\n')
     updateDB();
     //process.stdout.write(arr);
@@ -71,15 +72,11 @@ function updatePlay(jsonarr)
   var arr = JSON.parse(jsonarr);
   //console.log(arr[0]);
   leftSave = arr.length;
-  console.log("play number : " + leftSave);
+  //console.log("play number : " + leftSave);
   arr.forEach(function(jsonObj, n){
-    //console.log(jsonObj);
+    console.log(jsonObj);
     updateOnePlay(jsonObj);
   });
-  
-  //updateOnePlay(JSON.parse(arr)[0]);
-  //console.log(JSON.parse(arr)[1]);
-  
 }
 
 function updateDB()
