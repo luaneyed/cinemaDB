@@ -40,6 +40,13 @@ function searchMovie(title)
   return null;
 }
 
+function getTextNode(elem)
+{
+  return elem.contents().filter(function(){
+            return this.nodeType == Node.TEXT_NODE;
+          })[0];
+}
+
 function parseDate(str, theater)
 {
   if(theater == theaterEnum.lottecinema)
@@ -58,14 +65,10 @@ function parseDate(str, theater)
 
 function parseTimeSlot(str, theater)
 {
-  if(theater == theaterEnum.lottecinema)
-  {
-
-  }
+  if(theater == theaterEnum.lottecinema)  //  only for endTime
+    return str.substring(3, str.length - 1);
   else if(theater == theaterEnum.megabox)
-  {
     return str.split("~");
-  }
   else if(theater == theaterEnum.cgv)
   {
 
@@ -74,9 +77,10 @@ function parseTimeSlot(str, theater)
 
 function parseSeat(str, theater)
 {
-  if(theater == theaterEnum.lottecinema)
+  if(theater == theaterEnum.lottecinema)  //  only for totalSeat
   {
-
+    var temp = str.split("/")[1];
+    return temp.substring(1, temp.length - 2);  //  remove " " , "관"
   }
   else if(theater == theaterEnum.megabox)
   {
@@ -131,7 +135,50 @@ function registerOnePlay(title, age, option, month, day, weekday, theaterBrand, 
 
 function registerLottecinemaDay(table, date)
 {
-  
+  var link = "http://www.lottecinema.co.kr/LCHS/Contents/ticketing/ticketing.aspx";
+  // parse date
+  var movies = $(table).find($("dl.time_line"));
+  movies.each(function(){
+    var title = $(this).find($("dt")).contents().filter(function(){
+      return this.nodeType == Node.TEXT_NODE;
+    })[0].nodeValue;
+    var age = $(this).find($("dt span")).html();
+
+    var options = $(this).find($("dd"));
+    options.each(function(){
+      var option = "";
+      $(this).find("ul.cineD1 li").each(function(){
+        option += $(this).html();
+      });
+
+      var times = $(this).find($("ul.theater_time li"));
+      times.each(function(){
+        var screen = $(this).find($("a span.cineD2 em")).html();
+        var startTime = $(this).find($("a span.clock")).getTextNode();
+        var endTime = parseTimeSlot($(this).find($("a span.clock span")).html());
+
+        var type;
+        var totalSeat, leftSeat;
+        if($(this).hasClass("soldout"))
+        {
+          type = "";
+          totalSeat = 0;
+          leftSeat = 0;
+        }
+        else
+        {
+          if($(this).find($("a span.clock em.seat")).length > 0)
+            type = $(this).find($("a span.clock em.seat")).html();
+          else
+            type = "";
+          leftSeat = $(this).find($("a span.ppNum em")).html();
+          totalSeat = parseSeat($(this).find($("a span.ppNum")).contents().filter(function(){
+            return this.nodeType == Node.TEXT_NODE;
+          })[0].nodeValue, theaterEnum.lottecinema);
+        }
+      });
+    });
+  });
 }
 
 function registerMegaboxDay(theaterLocation, date, table)
@@ -168,7 +215,8 @@ function registerMegaboxDay(theaterLocation, date, table)
       var StartEndTime = parseTimeSlot($(this).find($("span.hover_time")).html(), theaterEnum.megabox);
       var startTime = StartEndTime[0];
       var endTime = StartEndTime[1];
-      var type;      var totalSeat, leftSeat;
+      var type;
+      var totalSeat, leftSeat;
       if($(this).hasClass("done"))
       {
         type = "";
@@ -197,11 +245,12 @@ function registerSchedule(schedule, theaterBrand, theaterLocation)
 {
   if(theaterBrand == theaterEnum.lottecinema)
   {
-
+    var date = $(schedule).find($("div.calendar fieldset.month-picker-fieldset"));
+    var table = $(schedule).find($("div.time_inner div.time_box div.time_aType"));
+    registerLottecinemaDay(theaterLocation, date, table);
   }
   else if(theaterBrand == theaterEnum.megabox)
   {
-    //var table = schedule.getElementsByClassName("movie_time_table v2")[0].getElementsByTagName("tbody")[0];
     var table = $(schedule).find($(".timetable_container .movie_time_table tbody"));
     var date = $(schedule).find($(".date"));
     registerMegaboxDay(theaterLocation, date, table);
@@ -212,27 +261,6 @@ function registerSchedule(schedule, theaterBrand, theaterLocation)
   }
 }
 
-/*
-function updatePage(theaterBrand, theaterLocation, html)
-{
-  page.open(url, function(){
-    document.documentElement.innerHTML = page.content;
-    var schedule;
-    switch(theaterBrand)
-    {
-      case theaterEnum.lottecinema:
-        break;
-      case theaterEnum.megabox:
-        schedule = $("#theaterSchedule");
-        break;
-      case theaterEnum.cgv:
-        break;
-    }
-    registerSchedule(schedule, theaterBrand, theaterLocation);
-  });
-}
-*/
-
 function doUpdate()
 {
   pages.forEach(function(p){
@@ -242,6 +270,7 @@ function doUpdate()
     switch(p.theaterBrand)
     {
       case theaterEnum.lottecinema:
+        schedule = $("#a_cont_cinema div.cont_cinema_Area");
         break;
       case theaterEnum.megabox:
         schedule = $("#theaterSchedule");
@@ -249,18 +278,11 @@ function doUpdate()
       case theaterEnum.cgv:
         break;
     }
-    var butt = $(schedule).find($("div.movie_time_header div.calendar div.date_wrap button.date_next"))
-    //butt.trigger("click");
-    //$("#theaterSchedule div.movie_time_header div.calendar div.date_wrap button.date_next").click();
-    //butt.click();
     registerSchedule(schedule, p.theaterBrand, p.theaterLocation);
   });
 
   output += "]";
-  //console.log("here");
   console.log(output);
-  //console.log("");
-  //process.stdout.write("short");
 }
 
 function registerTable(theaterBrand, theaterLocation, html)
@@ -280,7 +302,6 @@ function registerTable(theaterBrand, theaterLocation, html)
 casper.start("http://www.megabox.co.kr/?menuId=theater-detail&region=45&cinema=3021");
 
 casper.then(function() {
-  var i = 7;
   do {
     registerTable(theaterEnum.megabox, "대전", this.evaluate(function(){
       return document.documentElement.innerHTML;
@@ -291,11 +312,21 @@ casper.then(function() {
   }
   while(this.evaluate(function(){return $("#theaterSchedule div.timetable_container table.movie_time_table tbody").length;}) > 0)
   
-  doUpdate();
+  //doUpdate();
 });
 
-casper.thenOpen('http://phantomjs.org', function() {
-        //this.echo('Second Page: ' + this.getTitle());
-        });
+casper.thenOpen('http://www.lottecinema.co.kr/LCHS/Contents/Cinema/Cinema-Detail.aspx?divisionCode=1&detailDivisionCode=3&cinemaID=4002', function() {
+  do {
+    if(this.evaluate(function(){return $("#a_cont_cinema div.time_inner div.time_noData").css('display');}) == 'none')  //  if timetable exists
+    {
+      registerTable(theaterEnum.lottecinema, "대전(백화점)", this.evaluate(function(){
+        return document.documentElement.innerHTML;
+      }));
+    }
+    // click next-day button
+  } while(false)
+
+  doUpdate();
+});
 
 casper.run();
