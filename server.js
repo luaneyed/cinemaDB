@@ -13,11 +13,14 @@ db.once('open', function(){
 });
 mongoose.connect('mongodb://localhost/cinema');
 
+/*
 var corsOptions = {
   origin: '52.26.85.179'
 };
-
 app.use(cors(corsOptions));
+*/
+
+app.use(cors());
 app.use(bodyParser.urlencoded({ extended : true}));
 app.use(bodyParser.json());
 
