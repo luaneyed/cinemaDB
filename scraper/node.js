@@ -17,10 +17,15 @@ var casperData = "";
 
 casperPlay.stdout.on('data', function(data) {
   casperData += data;
-  process.stdout.write(data);
-  if(data.slice(-1) == '\n')
+  //process.stdout.write(data);
+  //if(data.slice(-1) == '\n')
+  if(String(data).split("^").length > 1)
+  {
+    casperData = casperData.split("\n").join("");
+    casperData = casperData.substring(0, casperData.length - 1);
     updateDB();
     //process.stdout.write(arr);
+  }
 });
 
 casperPlay.stderr.on('data', function(data) {
@@ -68,11 +73,11 @@ function updateOnePlay(json)
 
 function updatePlay(jsonarr)
 {
-  console.log(JSON.parse(jsonarr)[0]);
+  //console.log(JSON.parse(jsonarr)[0]);
   var arr = JSON.parse(jsonarr);
-  console.log(arr[0]);
+  //console.log(arr[0]);
   leftSave = arr.length;
-  console.log("play number : " + leftSave);
+  //console.log("play number : " + leftSave);
   arr.forEach(function(jsonObj, n){
     console.log(jsonObj);
     updateOnePlay(jsonObj);

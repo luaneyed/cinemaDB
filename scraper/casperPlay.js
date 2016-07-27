@@ -1,4 +1,4 @@
-console.log("Maybe No Syntax Error");
+//console.log("Maybe No Syntax Error");
 
 var $ = require('jquery');
 var casper = require('casper').create();
@@ -70,7 +70,7 @@ function parseDate(str, theater)
 function parseTimeSlot(str, theater)
 {
   if(theater == theaterEnum.lottecinema)  //  only for endTime
-    return str.substring(3, str.length - 1);
+    return str.substring(3, str.length);
   else if(theater == theaterEnum.megabox)
     return str.split("~");
   else if(theater == theaterEnum.cgv)
@@ -132,10 +132,17 @@ function registerOnePlay(title, age, option, month, day, weekday, theaterBrand, 
   newplay.link = link;
   
   if(output != "")
+  {
     output += ",";
+    console.log(",");
+  }
   else
+  {
     output += "[";
+    console.log("[");
+  }
   output += JSON.stringify(newplay);
+  console.log(JSON.stringify(newplay));
   //console.log(JSON.stringify(newplay));
 }
 
@@ -184,7 +191,8 @@ function registerLottecinemaDay(theaterLocation, date, table)
         var startTime = $(this).find($("a span.clock")).contents().filter(function(){
             return this.nodeType == Node.TEXT_NODE;
         })[0].nodeValue;
-        var endTime = parseTimeSlot($(this).find($("a span.clock span")).html());
+        //console.log("endTime html : " + 
+        var endTime = parseTimeSlot($(this).find($("a span.clock span")).html(), theaterEnum.lottecinema);
         var type;
         var totalSeat, leftSeat;
         if($(this).hasClass("soldout"))
@@ -311,7 +319,8 @@ function doUpdate()
   });
 
   output += "]";
-  console.log(output.substring(1, 100));
+  console.log("]^");
+  //console.log(output);
 }
 
 function registerTable(theaterBrand, theaterLocation, date, html)
@@ -327,11 +336,11 @@ function registerTable(theaterBrand, theaterLocation, date, html)
 
 //casper.start("http://www.naver.com/");
 casper.start("http://www.megabox.co.kr/?menuId=theater-detail&region=45&cinema=3021");
-
+//casper.start("http://www.lottecinema.co.kr/LCHS/Contents/Cinema/Cinema-Detail.aspx?divisionCode=1&detailDivisionCode=3&cinemaID=4006");
 casper.then(function() {
-  console.log("opened Megabox");
+  //console.log("opened Megabox");
 
-  /*
+  
   do {
     registerTable(theaterEnum.megabox, "대전", null, this.evaluate(function(){
       return document.documentElement.innerHTML;
@@ -341,15 +350,16 @@ casper.then(function() {
     });
   }
   while(this.evaluate(function(){return $("#theaterSchedule div.timetable_container table.movie_time_table tbody").length;}) > 0)
-  */
+  
 });
 
 casper.thenOpen('http://www.lottecinema.co.kr/LCHS/Contents/Cinema/Cinema-Detail.aspx?divisionCode=1&detailDivisionCode=3&cinemaID=4002', function() {
+//casper.then(function() {
   this.waitFor(function check() {
     return this.evaluate(function(){ return (document.querySelectorAll('label.month-picker-label').length > 0); });
       //&& (document.querySelectorAll('div.time_aType').length > 0); });
   }, function then(){
-    console.log("opened Lottecinema");
+    //console.log("opened Lottecinema");
     var month = Number(this.evaluate(function(){
       return $("#a_cont_cinema div.cont_cinema_Area div.calendar fieldset.month-picker-fieldset span.month:first-of-type em").html();}));
     var yesterday = 0;
@@ -413,6 +423,86 @@ casper.thenOpen('http://www.lottecinema.co.kr/LCHS/Contents/Cinema/Cinema-Detail
           order ++;
       });
     });
+    /*
+    casper.waitFor(function check() {
+        return (order == dates.length);
+    }, function then(){
+      doUpdate();
+    });
+  */
+  });
+});
+
+casper.thenOpen('http://www.lottecinema.co.kr/LCHS/Contents/Cinema/Cinema-Detail.aspx?divisionCode=1&detailDivisionCode=3&cinemaID=4006', function() {
+//casper.then(function() {
+  this.waitFor(function check() {
+    return this.evaluate(function(){ return (document.querySelectorAll('label.month-picker-label').length > 0); });
+      //&& (document.querySelectorAll('div.time_aType').length > 0); });
+  }, function then(){
+    //console.log("opened Lottecinema");
+    var month = Number(this.evaluate(function(){
+      return $("#a_cont_cinema div.cont_cinema_Area div.calendar fieldset.month-picker-fieldset span.month:first-of-type em").html();}));
+    var yesterday = 0;
+    var dates = this.evaluate(function(){
+      var ret = new Array();
+      $("#a_cont_cinema div.cont_cinema_Area div.calendar fieldset.month-picker-fieldset div.calendarArea label.month-picker-label").each(function(){
+        var o = new Object();
+        if($(this).hasClass("noDate") == false)
+          o.noDate = false;
+        else
+          o.noDate = true;
+        ret.push(o);
+      });
+      return ret;
+    });
+ 
+    var order = 0;
+    dates.forEach(function(val, n){
+      casper.waitFor(function check() {
+        return (order == n);
+      }, function then(){
+        var labelstr = "#a_cont_cinema div.cont_cinema_Area div.calendar fieldset.month-picker-fieldset div.calendarArea label.month-picker-label:nth-of-type(" + (n + 1) + ")";
+            var day = casper.evaluate(function(labelstr){return $(labelstr).find($("em")).html();}, labelstr);
+            if((day == 1) && (yesterday > 25))
+            {
+              month ++;
+              if(month == 13)
+                month = 1;
+            }
+            //console.log("day : " + day);
+            yesterday = day;       
+        
+        if(val.noDate == false)
+        {
+          casper.evaluate(function(labelstr){$(labelstr).mousedown();}, labelstr);
+
+          casper.waitFor(function check() {
+            return casper.evaluate(function(){ return (document.querySelectorAll('div.d_loading').length == 0); });
+          }, function then(){
+
+            
+            if(casper.evaluate(function(){return ($("div.time_inner div.time_box div.time_aType").length > 0);}))
+            {
+              var weekday = casper.evaluate(function(labelstr){return $(labelstr).find($("span")).html();}, labelstr);
+
+              var date = new Object();
+              date.month = month;
+              date.day = day;
+              date.weekday = weekday;
+
+              
+              registerTable(theaterEnum.lottecinema, "대전둔산(월평동)", date, casper.evaluate(function(){
+                return document.documentElement.innerHTML;
+              }));
+              
+            }
+            order ++;
+          });
+        }
+        else
+          order ++;
+      });
+    });
     casper.waitFor(function check() {
         return (order == dates.length);
     }, function then(){
@@ -421,5 +511,6 @@ casper.thenOpen('http://www.lottecinema.co.kr/LCHS/Contents/Cinema/Cinema-Detail
   
   });
 });
+
 
 casper.run();
