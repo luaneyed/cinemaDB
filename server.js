@@ -1,4 +1,5 @@
 var express = require('express');
+var cors = require('cors');
 var app = express();
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
@@ -12,10 +13,11 @@ db.once('open', function(){
 });
 mongoose.connect('mongodb://localhost/cinema');
 
+app.use(cors());
 app.use(bodyParser.urlencoded({ extended : true}));
 app.use(bodyParser.json());
 
-var port = process.env.PORT || 9090;
+var port = process.env.PORT || 8080;
 
 var router = require('./routes')(app, Play);
 
