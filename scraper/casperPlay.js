@@ -299,9 +299,3 @@ casper.thenOpen('http://phantomjs.org', function() {
         });
 
 casper.run();
-
-/*
-page.open("http://www.megabox.co.kr/?menuId=theater-detail&region=45&cinema=3021", function(status){
-  registerPage(theaterEnum.megabox, "대전", page.content);
-});
-*/

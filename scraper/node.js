@@ -1,5 +1,5 @@
 const spawn = require('child_process').spawn;
-const ls = spawn('casperjs', [__dirname + "/casper.js"]);
+const casperPlay = spawn('casperjs', [__dirname + "/casperPlay.js"]);
 var mongoose = require('mongoose');
 
 var leftSave = -1;
@@ -15,18 +15,18 @@ mongoose.connect('mongodb://localhost/cinema');
 
 var casperData = "";
 
-ls.stdout.on('data', function(data) {
+casperPlay.stdout.on('data', function(data) {
   casperData += data;
   if(data.slice(-1) == '\n')
     updateDB();
     //process.stdout.write(arr);
 });
 
-ls.stderr.on('data', function(data) {
+casperPlay.stderr.on('data', function(data) {
     //console.log("stderr: ${data}");
 });
 
-ls.on('close', function(code) {
+casperPlay.on('close', function(code) {
     console.log("child process exited with code ${code}");
 });
 
