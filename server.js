@@ -40,6 +40,8 @@ app.get('/', function(req,res){
   str += '\n/plays/theater/:theater (상영시간표 영화관 검색)';
   str += '\n/plays/brand/:brand (상영시간표 영화관브랜드 검색)';
   str += '\n/plays/title&day/:title/:day (상영시간표 제목&날짜 검색)';
+  str += '\n/plays/brand&day/:brand/:day (상영시간표 영화관브랜드&날짜 검색)';
+  str += '\n/plays/brand&title/:brand/:title (상영시간표 영화관브랜드&제목 검색)';
   res.send(str);
 });
 
