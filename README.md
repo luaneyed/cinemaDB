@@ -1,7 +1,7 @@
 # cinemaDB
 2016 Summer KAIST CS496 Final Project - DB server
 
-__
+&nbsp;
 
 It serves node.js express REST API.
 
